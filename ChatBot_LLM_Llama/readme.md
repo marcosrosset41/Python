@@ -111,5 +111,5 @@ Marcos Vinicius Rosset - Estudante de Dados e IA
 ---
 
 ## Licença
-Este projeto está sob a licença MIT e é OpenSource. Sinta-se à vontade para usar, modificar e distribuir.
+Este projeto é de código aberto. Sinta-se à vontade para usar, modificar e distribuir.
 
