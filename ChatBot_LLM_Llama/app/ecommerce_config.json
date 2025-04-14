@@ -1,0 +1,9 @@
+[
+  {
+    "nome": "Mercado Livre",
+    "url_base": "https://www.mercadolivre.com.br/",
+    "xpath_busca": "//input[@class='nav-search-input' and @id='cb1-edit']",
+    "modelo_scraper": "C:/Users/mvros/Documents/ChatBot_Comparador_de_preços-20250411T135948Z-002/ChatBot_LLM_Lhama/app/scraping/mercado_livre_autoscraper"
+  }
+
+]
