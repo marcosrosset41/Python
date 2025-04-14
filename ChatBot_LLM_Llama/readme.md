@@ -68,7 +68,6 @@ sendo que esse link para o webhook é disponibilizado pelo ngrok ao exectutar
 ```
 ngrok http 8000
 ```
-em terminal 2 (ngrok)
 ---
 
 ## Estrutura do Projeto
