@@ -1,15 +1,15 @@
 #  ChatBot WhatsApp com FastAPI, Twilio, LLaMA e Scraping
 
-Este projeto é um chatbot experimental que permite ao usuário interagir via WhatsApp para buscar o melhor preço de produtos em e-commerces pré estabelecidos. Ele utiliza LLM local (LLaMA), scraping com Selenium + AutoScraper e integra com a API do Twilio.
+Este projeto é um chatbot experimental que permite ao usuário interagir via WhatsApp para buscar o melhor preço de produtos em e-commerces pré estabelecidos. Ele utiliza LLM local (LLaMA), scraping com Selenium + AutoScraper e integra com a API do Twilio para por fim ser interagível pelo watsapp.
 
 ---
 
 ##  Visão Geral
 
 - O usuário envia uma mensagem pelo WhatsApp
-- O chatbot extrai palavras-chave e caracteristicas do item com um modelo LLaMA rodando localmente
+- O chatbot extrai palavras-chave e caracteristicas do item na mensagem com um modelo LLaMA rodando localmente
 - Com essas palavras-chave, ele busca preços em sites de e-commerce
-- Retorna a melhor oferta diretamente via WhatsApp
+- Retorna as ofertas encontradas diretamente pelo WhatsApp
 
 ---
 
@@ -64,7 +64,11 @@ E configure o webhook do Sandbox para:
 ```
 https://abcd1234.ngrok.io/twilio-webhook
 ```
-
+sendo que esse link para o webhook é disponibilizado pelo ngrok ao exectutar
+```
+ngrok http 8000
+```
+em terminal 2 (ngrok)
 ---
 
 ## Estrutura do Projeto
@@ -72,25 +76,30 @@ https://abcd1234.ngrok.io/twilio-webhook
 ```
 chatbot-whatsapp/
 ├── app/
-│   ├── main.py                # API principal
-│   ├── llm_llama.py          # LLM local com LLaMA
-│   ├── scraper.py            # Busca em e-commerce
-│   ├── twilio_webhook.py     # Integração com WhatsApp
-│   ├── ecommerce_config.json # URLs dos sites e XPaths das caixas de busca
-│   └── model/                # Arquivo GGUF do LLaMA
+│   ├── main.py                  # API principal
+│   ├── llm_llama.py             # LLM local com LLaMA
+│   ├── twilio_webhook.py        # Integração com WhatsApp
+│   ├── ecommerce_config.json    # URLs dos sites e XPaths das caixas de busca
+│   ├── scraping/                # Lógica de scraping nos e-commerces
+│   │   ├── kabum_autoscraper.py
+│   │   ├── mercado_livre_autoscraper.py
+│   │   └── scraper.py           # Utilitários de scraping
+│   └── model/                   # Modelo local do LLaMA
 │       └── llama-2-7b-chat.Q5_K_M.gguf
-├── requirements.txt
-├── .env
-├── start.bat                 # Script de inicialização (opcional)
+├── requirements.txt             # Dependências do projeto
+├── .env                         # Variáveis de ambiente (chaves, tokens etc.)
+├── start.bat                    # Script de inicialização (opcional)
 └── docs/
-    └── fluxo_completo.png
+    ├── diagram.png              # Diagrama do fluxo
+    └── readme.md                # Documentação do projeto
+
 ```
 
 ---
 
 ## Possíveis adaptações
 - Persistência em banco de dados
-- Deploy completo via container
+- Deploy completo via container, dispensando a maquina local como servidor
 - Integração com mais marketplaces
 - UI de gerenciamento
 
