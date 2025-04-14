@@ -66,6 +66,7 @@ https://abcd1234.ngrok.io/twilio-webhook
 ```
 sendo que esse link para o webhook é disponibilizado pelo ngrok ao exectutar
 ```
+# Terminal 2 (Ngrok)
 ngrok http 8000
 ```
 ---
