@@ -1,68 +1,90 @@
-from autoscraper import AutoScraper
 import json
+import time
+from autoscraper import AutoScraper
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import time
 
-palavras_chave = "lenovo core i9"
 
-def buscar_melhor_preco(palavras_chave):
-    with open(r'C:\Users\mvros\Documents\ChatBot_Comparador_de_preços-20250411T135948Z-002\ChatBot_LLM_Lhama\app\ecommerce_config.json', 'r', encoding='utf-8') as f:
-        config = json.load(f)
+def carregar_sites(path_json=r"C:\Users\mvros\Documents\ChatBot_Comparador_de_preços-20250411T135948Z-002\ChatBot_LLM_Llama\app\ecommerce_config.json"):
+    with open(path_json, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-    resultados = []
 
-    for site in config:
-        navegador = None
-        try:
-            url = site["url_base"]
-            xpath = site["xpath_busca"]
-            modelo_scraper = site["modelo_scraper"]
+def buscar_produto(site, palavra_chave):
+    print(f"\n🔍 Buscando por: {palavra_chave} em {site['nome']}")
 
-            navegador = webdriver.Chrome()
-            navegador.get(url)
+    # Configurações do navegador (headless)
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    navegador = webdriver.Chrome(options=options)
 
-            # Espera até o campo de busca estar visível
-            campo_busca = WebDriverWait(navegador, 10).until(
-                EC.visibility_of_element_located((By.XPATH, xpath))
-            )
-            campo_busca.clear()
-            campo_busca.send_keys(palavras_chave)
-            campo_busca.send_keys(Keys.RETURN)
+    # Abrir o site
+    navegador.get(site["url_base"])
+    time.sleep(2)
 
-            # Espera a página de resultados carregar
-            time.sleep(5)
+    # Buscar pela palavra-chave
+    barra_busca = navegador.find_element(By.XPATH, site["xpath_busca"])
+    barra_busca.send_keys(palavra_chave)
+    barra_busca.send_keys(Keys.RETURN)
+    time.sleep(10)
 
-            # Carrega o modelo treinado do AutoScraper
-            scraper = AutoScraper()
-            scraper.load(modelo_scraper)
+    # Carregar o modelo do AutoScraper
+    scraper = AutoScraper()
+    scraper.load(site["modelo_scraper"])
 
-            resultados_parciais = scraper.get_result_similar(navegador.page_source, grouped=True)
+    # verificando o html retornado
+    print("\n📄 Trecho do HTML:")
+    print(navegador.page_source[:1000])
+    # Buscar dados semelhantes àqueles treinados
+    resultados = scraper.get_result_similar(html=navegador.page_source, grouped=True)
+    navegador.quit()
 
-            # Filtra resultados agrupados com preço (R$)
-            ofertas = []
-            for key, values in resultados_parciais.items():
-                if any("R$" in v for v in values):
-                    ofertas.append(values)
-
-            resultados.append({site["nome"]: ofertas})
-
-        except Exception as e:
-            resultados.append({site["nome"]: f"Erro: {str(e)}"})
-
-        finally:
-            if navegador:
-                try:
-                    navegador.quit()
-                except:
-                    pass
-
+    print("⚙️ Resultados brutos encontrados pelo modelo:", resultados)
     return resultados
 
 
-resultados = buscar_melhor_preco(palavras_chave)
-for r in resultados:
-    print(json.dumps(r, indent=2, ensure_ascii=False))
+def extrair_ranking(resultados):
+    produtos = resultados.get("rule_redn", [])
+    precos = resultados.get("rule_69tg", [])
+
+    if not produtos or not precos:
+        print("⚠️ Nenhum produto ou preço encontrado.")
+        return []
+
+    # Garantir mesmo tamanho entre listas
+    pares = list(zip(produtos[:len(precos)], precos[:len(produtos)]))
+
+    # Limpar e converter preços para float
+    ranking = []
+    for produto, preco in pares:
+        try:
+            preco_float = float(preco.replace("R$", "").replace(".", "").replace(",", ".").strip())
+            ranking.append((produto, preco_float))
+        except Exception as e:
+            print(f"Erro ao converter preço '{preco}':", e)
+
+    # Ordenar por menor preço
+    ranking.sort(key=lambda x: x[1])
+    return ranking
+
+
+def test_scraper():
+# Carregar sites e buscar resultados
+    sites = carregar_sites()
+    palavra_chave = "lenovo core i9"
+
+    for site in sites:
+        resultados = buscar_produto(site, palavra_chave)
+        ranking = extrair_ranking(resultados)
+
+        print(f"\n📊 Ranking de preços - {site['nome']}")
+        if not ranking:
+            print("⚠️ Nenhum resultado encontrado.")
+        else:
+            for i, (produto, preco) in enumerate(ranking, start=1):
+                print(f"{i}. {produto} - R$ {preco:.2f}")
+
+test_scraper()
