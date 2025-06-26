@@ -3,7 +3,7 @@
 **`DevOps - MLOps`**
 
 Marcos Vinicius Rosset, 23 anos. Com mais de 3 anos de experiência como Analista de dados, Graduado em Ciências da computação com pós-graduação em Ciência de dados. 
-Por aqui vc pode acompanhar meus projetos profissionais e estudos como desenvolvedor.
+Por aqui você pode acompanhar meus projetos profissionais e estudos como desenvolvedor.
 
 <p align="left">
     <a href="https://github.com/marcosrosset41?tab=repositories&sort=stargazers">
